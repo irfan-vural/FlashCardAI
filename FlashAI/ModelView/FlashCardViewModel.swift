@@ -51,6 +51,21 @@ class FlashcardViewModel {
                 print("Kaydetme hatası: \(error)")
             }
         }
+    
+    // 4. Kart Silme Fonksiyonu
+        func deleteCard(_ card: Flashcard) {
+            // Kartın ID'si Firestore'da var mı diye kontrol ediyoruz
+            guard let documentId = card.id else { return }
+            
+            // Firestore'dan o dökümanı siliyoruz
+            db.collection("flashcards").document(documentId).delete { error in
+                if let error = error {
+                    print("Kart silinirken hata oluştu: \(error.localizedDescription)")
+                } else {
+                    print("Kart başarıyla silindi!")
+                }
+            }
+        }
     func generateAnswerFor(question: String) async -> String {
         // İŞTE YENİ SİSTEMDEKİ DOĞRU KULLANIM:
         // Önce backend altyapısını seçerek (ücretsiz katman için googleAI) bağlantıyı kuruyoruz
