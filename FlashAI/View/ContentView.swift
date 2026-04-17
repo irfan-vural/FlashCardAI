@@ -19,6 +19,16 @@ struct ContentView: View {
                     LazyVStack(spacing: 25) {
                         ForEach(viewModel.flashcards) { card in
                             FlashcardView(card: card)
+                                .contextMenu{
+                                    Button(role: .destructive, action: {
+                                                            // Silme animasyonu ile birlikte fonksiyonu çağırıyoruz
+                                                            withAnimation {
+                                                                viewModel.deleteCard(card)
+                                                            }
+                                                        }) {
+                                                            Label("Kartı Sil", systemImage: "trash")
+                                                        }
+                                }
                         }
                     }
                     .padding(.top, 20)

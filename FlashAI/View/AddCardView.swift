@@ -24,7 +24,7 @@ struct AddCardView: View {
                                 .font(.caption.bold())
                                 .foregroundColor(.gray)
                             
-                            TextField("Örn:Perine nedir", text: $questionText)
+                            TextField("Örn: Perine nedir", text: $questionText)
                                 .padding()
                                 .background(Color(UIColor.secondarySystemGroupedBackground))
                                 .cornerRadius(15)
