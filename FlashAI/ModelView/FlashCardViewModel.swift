@@ -7,7 +7,7 @@ import FirebaseFirestore
 class FlashcardViewModel {
     var flashcards: [Flashcard] = []
     var isGenerating: Bool = false
-    private let db = Firestore.firestore()
+    private let db = Firestore.firestore(database: "default")
     private var listener: ListenerRegistration? // Dinleyiciyi takip etmek için
     // Parametresiz init kalabilir, başlangıç değerlerini zaten yukarıda verdik
     init() {
@@ -37,9 +37,10 @@ class FlashcardViewModel {
         }
     // ViewModel içindeki addCard fonksiyonunu şununla değiştir:
         func addCard(question: String, answer: String, category: String, sub1: String, sub2: String) {
-            guard let uid = AuthManager.shared.currentUserID else { return }
-            
-            // Verileri temizle ve BÜYÜK HARFE çevir (Boş bırakılanları "GENEL" gibi bir kelimeye atayabilirsin veya boş bırakabilirsin)
+            guard let uid = AuthManager.shared.currentUserID else {
+                print("HATA: Kullanıcı henüz giriş yapmamış (UID nil!)") // Bunu kontrol et
+                return }
+          
             let cleanCategory = category.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
             let cleanSub1 = sub1.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
             let cleanSub2 = sub2.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
@@ -97,13 +98,18 @@ class FlashcardViewModel {
         let model = ai.generativeModel(modelName: "gemini-2.5-flash-lite")
         
         let prompt = """
-        Sen bir flashcard uygulamasının arka yüzüsün. Görevin, verilen soruya veya terime doğrudan, 1-2 cümlelik kısa ve net bir cevap üretmektir. 
-        
+        Sen bir TUS flashcard uygulamasının arka yüzüsün. Görevin, verilen tıbbi soruya veya terime yönelik yüksek verimli, sınav odaklı, kısa ve net bir cevap üretmektir. Cevap, ezberlenebilir ve klinik olarak anlamlı olmalıdır.
+
         KESİN KURALLAR:
-        - Soruyu asla tekrar etme.
-        - "Cevap:", "Açıklama:" gibi hiçbir ön ek veya başlık kullanma.
-        - Kalın yazı (**), liste veya markdown işaretleri kullanma.
-        - Sadece ve sadece cevabın kendisini düz metin olarak ver.
+
+        Soruyu asla tekrar etme.
+        "Cevap:", "Açıklama:" gibi hiçbir ön ek veya başlık kullanma.
+        Kalın yazı (**), liste, emoji veya markdown işaretleri kullanma.
+        Cevap en fazla 3-4 cümle olmalı.
+        Gereksiz detay verme, sadece sınavda işine yarayacak kritik bilgiyi yaz.
+        Mümkünse anahtar kelimeler ve ayırt ettirici özellikler (en sık neden, en önemli bulgu, ilk tercih tedavi gibi) içersin.
+        Tanım sorularında kısa tanım + ayırt edici özellik ekle.
+        Klinik sorularda doğrudan tanı, mekanizma veya en doğru yaklaşımı yaz.
         
         Soru: \(question)
         """
