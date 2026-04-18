@@ -7,6 +7,9 @@ struct AddCardView: View {
     @State private var questionText: String = ""
     @State private var answerText: String = ""
     @State private var isLoadingAI: Bool = false
+    @State private var category: String = ""
+    @State private var sub1: String = ""
+    @State private var sub2: String = ""
     
     var body: some View {
         NavigationStack {
@@ -29,6 +32,43 @@ struct AddCardView: View {
                                 .background(Color(UIColor.secondarySystemGroupedBackground))
                                 .cornerRadius(15)
                                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                        }
+                        Section(header: Text("Kategori Bilgileri")) {
+                            // Ana Kategori
+                            HStack {
+                                TextField("Ana Kategori (Örn: Yazılım)", text: $category)
+                                Menu {
+                                    ForEach(viewModel.uniqueCategories, id: \.self) { cat in
+                                        Button(cat) { self.category = cat }
+                                    }
+                                } label: {
+                                    Image(systemName: "chevron.down.circle")
+                                }
+                            }
+                            
+                            // Alt Kategori 1
+                            HStack {
+                                TextField("Alt Kategori 1 (Örn: Web)", text: $sub1)
+                                Menu {
+                                    ForEach(viewModel.uniqueSubCategories1(for: category), id: \.self) { s1 in
+                                        Button(s1) { self.sub1 = s1 }
+                                    }
+                                } label: {
+                                    Image(systemName: "chevron.down.circle")
+                                }
+                            }
+                            HStack {
+                                TextField("Alt Kategori 2 (Örn: Java)", text: $sub2)
+                                Menu {
+                                    ForEach(viewModel.uniqueSubCategories2(for: category), id: \.self) { s2 in
+                                        Button(s2) { self.sub2 = s2 }
+                                    }
+                                } label: {
+                                    Image(systemName: "chevron.down.circle")
+                                }
+                            }
+                            
+                            // Alt Kategori 2 (Bu alanı da aynı mantıkla ekleyebilirsin)
                         }
                         
                         // --- Yapay Zeka Aksiyon Butonu ---
@@ -90,7 +130,7 @@ struct AddCardView: View {
                 // Kaydet Butonu
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Kaydet") {
-                        viewModel.addCard(question: questionText, answer: answerText)
+                        viewModel.addCard(question: questionText, answer: answerText, category: category, sub1: sub1, sub2: sub2)
                         dismiss()
                     }
                     .fontWeight(.bold)

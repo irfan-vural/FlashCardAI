@@ -35,22 +35,44 @@ class FlashcardViewModel {
                     } ?? []
                 }
         }
-    func addCard(question: String, answer: String) {
+    // ViewModel içindeki addCard fonksiyonunu şununla değiştir:
+        func addCard(question: String, answer: String, category: String, sub1: String, sub2: String) {
             guard let uid = AuthManager.shared.currentUserID else { return }
+            
+            // Verileri temizle ve BÜYÜK HARFE çevir (Boş bırakılanları "GENEL" gibi bir kelimeye atayabilirsin veya boş bırakabilirsin)
+            let cleanCategory = category.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+            let cleanSub1 = sub1.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+            let cleanSub2 = sub2.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
             
             let newCard = Flashcard(
                 ownerId: uid,
-                question: question,
-                answer: answer
+                question: question.trimmingCharacters(in: .whitespacesAndNewlines),
+                answer: answer.trimmingCharacters(in: .whitespacesAndNewlines),
+                category: cleanCategory.isEmpty ? "DİĞER" : cleanCategory,
+                subCategory1: cleanSub1,
+                subCategory2: cleanSub2
             )
             
             do {
-                // Firestore'a dökümanı ekle
                 _ = try db.collection("flashcards").addDocument(from: newCard)
             } catch {
                 print("Kaydetme hatası: \(error)")
             }
         }
+    // Mevcut kartlardan benzersiz ana kategorileri çeker
+    var uniqueCategories: [String] {
+        Array(Set(flashcards.map { $0.category })).sorted()
+    }
+
+    // Seçilen ana kategoriye ait alt kategorileri çeker
+    func uniqueSubCategories1(for category: String) -> [String] {
+        Array(Set(flashcards.filter { $0.category == category }.map { $0.subCategory1 })).sorted()
+    }
+
+    // Seçilen alt kategoriye ait en alt kategorileri çeker
+    func uniqueSubCategories2(for sub1: String) -> [String] {
+        Array(Set(flashcards.filter { $0.subCategory1 == sub1 }.map { $0.subCategory2 })).sorted()
+    }
     
     // 4. Kart Silme Fonksiyonu
         func deleteCard(_ card: Flashcard) {
